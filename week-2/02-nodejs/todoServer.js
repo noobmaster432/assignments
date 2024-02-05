@@ -24,8 +24,8 @@
     Request Body: { "title": "Buy groceries", "completed": false, description: "I should buy groceries" }
     
   4. PUT /todos/:id - Update an existing todo item by ID
-    Description: Updates an existing todo item identified by its ID.
-    Request Body: JSON object representing the updated todo item.
+    Description: 
+    Request Body: JSON object representing the updated todo item.Updates an existing todo item identified by its ID.
     Response: 200 OK if the todo item was found and updated, or 404 Not Found if not found.
     Example: PUT http://localhost:3000/todos/123
     Request Body: { "title": "Buy groceries", "completed": true }
@@ -43,7 +43,57 @@
   const bodyParser = require('body-parser');
   
   const app = express();
-  
   app.use(bodyParser.json());
+  const port = 3001;
+
+  let todos = [];
+
+  app.get('/todos', (req, res) => {
+    res.status(200).json(todos);
+  });
+
+  app.get('/todos/:id', (req, res) => {
+    const todo = todos.find(todos => todos.id === parseInt(req.params.id));
+    if(todo){
+      res.status(200).json(todo);
+    } else{
+      res.status(404).send('Not Found');
+    }
+  });
+
+  app.post('/todos', (req, res) => {
+    const newtodo = {
+      id: Math.floor(Math.random() * 1000000),
+      title: req.body.title,
+      description: req.body.description
+    };
+    todos.push(newtodo);
+    res.status(201).json(newtodo);
+  });
+
+  app.put('/todos/:id', (req, res) => {
+    const todo = todos.find(todo => todo.id === parseInt(req.params.id));
+    if(todo){
+      todo.title = req.body.title;
+      todo.description = req.body.description;
+      res.status(200).send();
+    } else{
+      res.status(404).send('Not Found');
+    }
+  });
+
+  app.delete('/todos/:id', (req, res) => {
+    const todo = todos.find(todo => todo.id === parseInt(req.params.id));
+    if(todo){
+      todos = todos.filter(todo => todo.id !== parseInt(req.params.id));
+      res.status(200).send();
+    } else{
+      res.status(404).send('Not Found');
+    }
+  });
+
+  app.listen(port, () => {
+    console.log(`Server is live on port ${port}`);
+  });
   
   module.exports = app;
