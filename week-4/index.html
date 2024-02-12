@@ -7,16 +7,26 @@
     let todoState = [];
     let oldTodoState = [];
 
-    function addTodoToDom() {
-      
+    function addTodoToDom(todo) {
+      const parent = document.getElementById("todos");
+      const todoDiv = document.createElement("div");
+      todoDiv.innerHTML = `${todo.title}: ${todo.description}`
+      todoDiv.setAttribute("id", todo.id);
+      parent.appendChild(todoDiv);
     }
 
     function removeTodoFromDom(todo) {
-      
+      const todoDiv = document.getElementById(`${todo.id}`);
+      if(todoDiv){
+        todoDiv.parentNode.removeChild(todoDiv);
+      }
     }
 
     function updateTodoInDom(oldTodo, newTodo) {
-        
+      const todoDiv = document.getElementById(`${oldTodo.id}`);
+      if(todoDiv){
+        todoDiv.innerHTML = `${newTodo.title}: ${newTodo.description}`;
+      }
     }
 
     function updateState(newTodos) {
@@ -25,13 +35,19 @@
       // 1. added
       // 2. deleted
       // 3. updated
-      const added = [];
-      const deleted = [];
-      const updated = [];
+      const added = newTodos.filter(todo => !oldTodoState.includes(todo));
+      const deleted = oldTodoState.filter(todo => !newTodos.includes(todo));
+      const updated = newTodos.filter(todo => oldTodoState.some(oldTodo => oldTodo.id === todo.id && oldTodo.title !== todo.title && oldTodo.description !== todo.description));
       // calculate these 3 arrays
       // call addTodo, removeTodo, updateTodo functions on each of the
       // elements
-      oldTodoState = newTodos;
+      added.forEach(todo => addTodoToDom(todo));
+      deleted.forEach(todo => removeTodoFromDom(todo));
+      updated.forEach(todo => {
+        const oldTodo = oldTodoState.find(oldTodo => oldTodo.id === todo.id);
+        updateTodoInDom(oldTodo, todo);
+      });
+      oldTodoState = [...newTodos];
     }
 
     function addTodo() {
@@ -50,12 +66,9 @@
 <body>
   <input type="text" id="title" placeholder="Todo title"></input> <br /><br />
   <input type="text" id="description" placeholder="Todo description"></input> <br /><br />
-  <button onclick="addTodo()">Add todo</button>
-  <br /> <br />
+  <button onclick="addTodo()">Add todo</button> <br /><br />
 
-  <div id="todos">
-
-  </div>
+  <div id="todos"></div>
 </body>
 
 </html>
