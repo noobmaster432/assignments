@@ -12,8 +12,30 @@ const prisma = new PrismaClient();
  *  id: number
  * }
  */
-export async function createTodo(userId: number, title: string, description: string) {
-    
+
+interface Todo {
+    title: string;
+    description: string;
+    done: boolean;
+    id: number;
+    userId: number;
+}
+
+export async function createTodo(userId: number, title: string, description: string): Promise<Todo> {
+    try {
+        const createTodo: Todo = await prisma.todo.create({
+            data: {
+                title,
+                description,
+                userId,
+                done: false
+            }
+        });
+
+        return createTodo;
+    } catch (error:any) {
+        throw new Error('Failed to create todo: ' + error.message);
+    }
 }
 /*
  * mark done as true for this specific todo.
@@ -25,8 +47,25 @@ export async function createTodo(userId: number, title: string, description: str
  *  id: number
  * }
  */
-export async function updateTodo(todoId: number) {
+export async function updateTodo(todoId: number): Promise<Todo> {
+    try {
+        const updateTodo: Todo | null = await prisma.todo.update({
+            where: {
+                id: todoId
+            },
+            data: {
+                done: true
+            }
+        });
+        
+        if (!updateTodo) {
+            throw new Error('Todo not found');
+        }
 
+        return updateTodo;
+    } catch (error:any) {
+        throw new Error('Failed to update todo: ' + error.message);
+    }
 }
 
 /*
@@ -39,6 +78,16 @@ export async function updateTodo(todoId: number) {
  *  id: number
  * }]
  */
-export async function getTodos(userId: number) {
+export async function getTodos(userId: number): Promise<Todo[]> {
+    try {
+        const todos: Todo[] = await prisma.todo.findMany({
+            where: {
+                userId: userId
+            }
+        });
 
+        return todos;
+    } catch (error:any) {
+        throw new Error('Failed to get todos: ' + error.message);
+    }
 }
